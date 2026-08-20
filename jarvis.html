@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.A.R.V.I.S. MK-IV Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #00eeff; 
+            --bg-color: #010103;     
+            --glow-color: rgba(0, 238, 255, 0.6);
+            --faint-color: rgba(0, 238, 255, 0.15);
+            --danger-color: rgba(255, 0, 85, 0.8);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            font-family: 'Orbitron', 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            padding: 20px;
+            box-sizing: border-box;
+            background-image: 
+                linear-gradient(var(--faint-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--faint-color) 1px, transparent 1px);
+            background-size: 40px 40px; 
+            transition: background-color 0.3s;
+        }
+
+        /* CRAZY MODE ANIMATIONS */
+        body.crazy-mode {
+            animation: crazy-flash 0.15s infinite;
+        }
+        
+        body.crazy-mode .advanced-globe, 
+        body.crazy-mode .ai-core-container {
+            animation: crazy-shake 0.2s infinite;
+        }
+
+        body.crazy-mode .ring,
+        body.crazy-mode .ring-1,
+        body.crazy-mode .ring-2,
+        body.crazy-mode .radar-sweep {
+            animation-duration: 0.1s !important;
+            border-color: #fff !important;
+        }
+
+        @keyframes crazy-flash {
+            0% { background-color: #ff0000; filter: invert(0%); transform: scale(1); }
+            25% { background-color: #00ff00; filter: invert(100%); transform: scale(1.05) rotate(2deg); }
+            50% { background-color: #0000ff; filter: invert(0%); transform: scale(0.95) rotate(-2deg); }
+            75% { background-color: #ff0000; filter: invert(100%); transform: scale(1.02) rotate(1deg); }
+            100% { background-color: #00ff00; filter: invert(0%); transform: scale(1); }
+        }
+
+        @keyframes crazy-shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(10px, 15px) rotate(5deg); }
+            50% { transform: translate(-15px, -10px) rotate(-5deg); }
+            75% { transform: translate(15px, -15px) rotate(3deg); }
+            100% { transform: translate(-10px, 10px) rotate(-3deg); }
+        }
+
+        /* HUD CORNER BRACKETS */
+        .hud-corner {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--primary-color);
+            z-index: -1;
+            opacity: 0.6;
+            box-shadow: 0 0 10px var(--glow-color);
+        }
+        .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
+        .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
+        .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
+
+        /* SCROLLING DATA STREAM */
+        .data-stream {
+            position: fixed;
+            left: 30px;
+            top: 80px;
+            bottom: 80px;
+            width: 250px;
+            font-size: 0.6rem;
+            color: var(--primary-color);
+            opacity: 0.6;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            z-index: -1;
+            text-align: left;
+            text-shadow: 0 0 3px var(--glow-color);
+            letter-spacing: 1px;
+        }
+
+        /* RIGHT PANEL: ADVANCED GLOBE & CHARTS */
+        .right-panel {
+            position: fixed;
+            right: 40px;
+            top: 80px;
+            bottom: 80px;
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            z-index: -1;
+        }
+
+        .advanced-globe {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            perspective: 1000px;
+            border-radius: 50%;
+            border: 1px solid var(--faint-color);
+            box-shadow: inset 0 0 30px var(--glow-color), 0 0 20px var(--glow-color);
+            background: radial-gradient(circle, rgba(0,238,255,0.1) 0%, transparent 70%);
+            overflow: hidden;
+        }
+        
+        .radar-sweep {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(from 0deg, transparent 70%, var(--glow-color) 100%);
+            transform-origin: 0 0;
+            animation: sweep 3s linear infinite;
+        }
+
+        .globe-3d-grid {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            transform-style: preserve-3d;
+            animation: spin-globe 12s linear infinite;
+        }
+
+        .ring {
+            position: absolute;
+            width: 100%; height: 100%;
+            border: 1px dashed var(--primary-color);
+            border-radius: 50%;
+            opacity: 0.7;
+        }
+        .ring:nth-child(1) { transform: rotateY(0deg); }
+        .ring:nth-child(2) { transform: rotateY(45deg); }
+        .ring:nth-child(3) { transform: rotateY(90deg); }
+        .ring:nth-child(4) { transform: rotateY(135deg); }
+        .ring:nth-child(5) { transform: rotateX(90deg); border: 2px solid var(--primary-color); }
+
+        @keyframes sweep { 0% { transform: rotate(0deg) translate(-50%, -50%); } 100% { transform: rotate(360deg) translate(-50%, -50%); } }
+        @keyframes spin-globe { from { transform: rotateX(15deg) rotateY(0deg); } to { transform: rotateX(15deg) rotateY(360deg); } }
+
+        .tech-charts {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            position: relative;
+        }
+        .chart-bar {
+            width: 15px;
+            background: var(--primary-color);
+            box-shadow: 0 0 10px var(--glow-color);
+            animation: bounce-bar 1.5s infinite alternate ease-in-out;
+        }
+        .chart-bar:nth-child(1) { animation-delay: 0.1s; }
+        .chart-bar:nth-child(2) { animation-delay: 0.5s; }
+        .chart-bar:nth-child(3) { animation-delay: 0.2s; }
+        .chart-bar:nth-child(4) { animation-delay: 0.6s; background: var(--danger-color); box-shadow: 0 0 10px var(--danger-color); }
+        .chart-bar:nth-child(5) { animation-delay: 0.3s; }
+        .chart-bar:nth-child(6) { animation-delay: 0.8s; }
+
+        @keyframes bounce-bar { 0% { height: 10px; } 100% { height: 90px; } }
+
+        /* CENTER UI ELEMENTS */
+        .container {
+            text-align: center;
+            max-width: 700px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .ai-core-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .core-static-frame {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            box-shadow: inset 0 0 20px var(--glow-color), 0 0 20px var(--glow-color);
+        }
+
+        .ring-1 {
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 4px solid transparent;
+            border-top-color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            border-radius: 50%;
+            animation: rotate-clockwise 3s linear infinite;
+        }
+
+        .ring-2 {
+            position: absolute;
+            top: 25px; left: 25px; right: 25px; bottom: 25px;
+            border: 2px dashed rgba(255, 0, 100, 0.8);
+            border-radius: 50%;
+            animation: rotate-counter-clockwise 5s linear infinite;
+        }
+
+        /* Central Node with Inner Sound Waves */
+        .central-node {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background-color: rgba(0, 238, 255, 0.1);
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            box-shadow: 0 0 30px var(--glow-color);
+            overflow: hidden;
+        }
+
+        .core-wave {
+            width: 4px;
+            height: 5px;
+            background: var(--primary-color);
+            border-radius: 2px;
+            box-shadow: 0 0 5px var(--glow-color);
+            transition: height 0.2s ease;
+        }
+
+        .listening .central-node { animation: core-pulse 0.5s infinite alternate; }
+
+        /* Animate inner sound waves when active */
+        .active-core .core-wave { animation: inner-eq-pulse 0.4s infinite alternate ease-in-out; }
+        .active-core .core-wave:nth-child(1) { animation-delay: 0.1s; }
+        .active-core .core-wave:nth-child(2) { animation-delay: 0.3s; }
+        .active-core .core-wave:nth-child(3) { animation-delay: 0.0s; }
+        .active-core .core-wave:nth-child(4) { animation-delay: 0.4s; }
+        .active-core .core-wave:nth-child(5) { animation-delay: 0.2s; }
+
+        @keyframes inner-eq-pulse { 0% { height: 5px; } 100% { height: 35px; background: #fff; } }
+        @keyframes rotate-clockwise { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes rotate-counter-clockwise { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+        @keyframes core-pulse { 0% { transform: translate(-50%, -50%) scale(1); } 100% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 50px #fff; } }
+
+        .display-panel {
+            width: 100%;
+            background: rgba(5, 5, 10, 0.85);
+            border: 1px solid var(--faint-color);
+            padding: 20px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0, 238, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .display-panel::before, .display-panel::after {
+            content: ""; position: absolute; width: 25px; height: 25px;
+        }
+        .display-panel::before { top: -1px; left: -1px; border-top: 3px solid var(--primary-color); border-left: 3px solid var(--primary-color); }
+        .display-panel::after { bottom: -1px; right: -1px; border-bottom: 3px solid var(--primary-color); border-right: 3px solid var(--primary-color); }
+
+        #transcript { font-size: 0.8rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); margin-bottom: 10px; }
+        #response-text { font-size: 1.2rem; line-height: 1.5; color: var(--primary-color); text-shadow: 0 0 5px var(--glow-color); border-top: 1px solid var(--faint-color); padding-top: 15px; }
+
+        /* Audio Visualizer (Under text) */
+        .audio-visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 4px;
+            height: 30px;
+            margin-top: 15px;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+        .audio-visualizer.active { opacity: 1; }
+        .v-bar { width: 6px; background: var(--primary-color); height: 5px; border-radius: 2px; }
+        .active .v-bar { animation: eq-pulse 0.4s infinite alternate; }
+        .active .v-bar:nth-child(1) { animation-delay: 0.1s; }
+        .active .v-bar:nth-child(2) { animation-delay: 0.3s; }
+        .active .v-bar:nth-child(3) { animation-delay: 0.0s; }
+        .active .v-bar:nth-child(4) { animation-delay: 0.4s; }
+        .active .v-bar:nth-child(5) { animation-delay: 0.2s; }
+        
+        @keyframes eq-pulse { 0% { height: 5px; } 100% { height: 30px; } }
+
+        .status-bar {
+            width: 100%; display: flex; justify-content: space-between;
+            font-size: 0.7rem; opacity: 0.7; margin-top: 25px;
+            letter-spacing: 1px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HUD Borders -->
+    <div class="hud-corner top-left"></div>
+    <div class="hud-corner top-right"></div>
+    <div class="hud-corner bottom-left"></div>
+    <div class="hud-corner bottom-right"></div>
+
+    <!-- Left Side Data Stream -->
+    <div class="data-stream" id="data-stream"></div>
+
+    <!-- Right Side Holographic Panel -->
+    <div class="right-panel">
+        <div class="advanced-globe">
+            <div class="radar-sweep"></div>
+            <div class="globe-3d-grid">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+            </div>
+        </div>
+        <div class="tech-charts">
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+        </div>
+    </div>
+
+    <!-- Center Interface -->
+    <div class="container">
+        <div class="ai-core-container" id="ai-core">
+            <div class="core-static-frame"></div>
+            <div class="ring-1"></div>
+            <div class="ring-2"></div>
+            
+            <!-- Central Node with Sound Waves -->
+            <div class="central-node">
+                <div class="core-wave"></div>
+                <div class="core-wave"></div>
+                <div class="core-wave"></div>
+                <div class="core-wave"></div>
+                <div class="core-wave"></div>
+            </div>
+        </div>
+
+        <div class="display-panel">
+            <div id="transcript">SYS_READY // AWAITING AUDIO INPUT</div>
+            <div id="response-text">Systems online. Click the core to initialize, Sir.</div>
+            
+            <div class="audio-visualizer" id="visualizer">
+                <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+            </div>
+        </div>
+        
+        <div class="status-bar">
+            <div>SYS_LOAD: NOMINAL</div>
+            <div>LOC: DIMAPUR, INDIA</div>
+            <div id="clock">TIME: 00:00:00</div>
+        </div>
+    </div>
+
+    <script>
+        // VISUAL EFFECTS: Live Clock and Data Stream
+        setInterval(() => { document.getElementById('clock').innerText = "TIME: " + new Date().toLocaleTimeString(); }, 1000);
+
+        const streamContainer = document.getElementById('data-stream');
+        const dataPhrases = [
+            "INITIALIZING NEURAL NET...", "BYPASSING SECURITY PROTOCOLS...", "QUANTUM DECRYPTION: ACTIVE",
+            "SYNCING SATELLITE FEED...", "CALIBRATING SENSORS...", "UPDATING GLOBAL DATABASE...",
+            "ROUTING PACKETS: NODE 7", "THERMAL SCANS: NOMINAL", "MEMORY ALLOCATION: 14TB",
+            "VERIFYING BIOMETRICS...", "ESTABLISHING SECURE CONNECTION...", "PINGING DIMAPUR SERVERS..."
+        ];
+
+        setInterval(() => {
+            const p = document.createElement('div');
+            p.innerText = "> " + dataPhrases[Math.floor(Math.random() * dataPhrases.length)] + " [" + Math.random().toString(36).substring(2, 7).toUpperCase() + "]";
+            streamContainer.appendChild(p);
+            if(streamContainer.childElementCount > 25) streamContainer.removeChild(streamContainer.firstChild);
+        }, 500);
+
+        // UI ELEMENTS
+        const transcriptDisplay = document.getElementById('transcript');
+        const responseDisplay = document.getElementById('response-text');
+        const aiCore = document.getElementById('ai-core');
+        const visualizer = document.getElementById('visualizer');
+
+        // SPEECH SYNTHESIS (SPEAKING)
+        function speak(text, lang = 'en-US') {
+            window.speechSynthesis.cancel(); 
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.pitch = 0.8; 
+            utterance.rate = 1.1;
+            utterance.lang = lang; 
+            
+            responseDisplay.innerText = text;
+            
+            // Animate visualizer and center core while speaking
+            visualizer.classList.add('active');
+            aiCore.classList.add('active-core');
+            
+            utterance.onend = () => { 
+                visualizer.classList.remove('active'); 
+                aiCore.classList.remove('active-core');
+            }
+            
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // VOICE COMMAND INPUT LOGIC
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+            alert("Speech Recognition not supported. Please use Google Chrome.");
+        } else {
+            const recognition = new SpeechRecognition();
+            
+            // Indian English for better accent recognition
+            recognition.lang = 'en-IN'; 
+
+            aiCore.addEventListener('click', () => {
+                window.speechSynthesis.cancel(); 
+                recognition.start();
+                
+                aiCore.classList.add('listening');
+                aiCore.classList.add('active-core');
+                visualizer.classList.add('active');
+                
+                transcriptDisplay.innerText = "LISTENING (MIC ACTIVE)...";
+                responseDisplay.innerText = "Processing audio input...";
+            });
+
+            recognition.onresult = (event) => {
+                aiCore.classList.remove('listening');
+                aiCore.classList.remove('active-core');
+                visualizer.classList.remove('active');
+                
+                const transcript = event.results[event.resultIndex][0].transcript.toLowerCase();
+                transcriptDisplay.innerText = `INPUT_RX: "${transcript}"`;
+                processCommand(transcript);
+            };
+
+            recognition.onerror = (event) => {
+                aiCore.classList.remove('listening');
+                aiCore.classList.remove('active-core');
+                visualizer.classList.remove('active');
+                transcriptDisplay.innerText = "Error in input: " + event.error;
+            };
+        }
+
+        // WEB SEARCH LOGIC
+        async function searchWeb(query) {
+            speak(`Accessing global database for ${query}, sir.`);
+            const url = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.AbstractText) {
+                    let sentences = data.AbstractText.match(/[^\.!\?]+[\.!\?]+/g) || [data.AbstractText];
+                    speak(sentences.slice(0, 2).join(' '));
+                } else {
+                    speak(`I cannot summarize that directly, sir. Opening visual search.`);
+                    setTimeout(() => { window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank"); }, 2500);
+                }
+            } catch (error) {
+                speak("Network connection failed. Bypassing to visual search.");
+                window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, "_blank");
+            }
+        }
+
+        // NEW ROCK-SOLID WEATHER LOGIC (Open-Meteo API)
+        async function searchWeather(location) {
+            speak(`Accessing meteorological satellites for ${location}, sir...`);
+            try {
+                // Step 1: Geocode the location to get coordinates
+                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1`);
+                const geoData = await geoRes.json();
+                
+                if (!geoData.results || geoData.results.length === 0) {
+                    speak(`I am sorry sir, I could not locate ${location} on the global map.`);
+                    return;
+                }
+                
+                const lat = geoData.results[0].latitude;
+                const lon = geoData.results[0].longitude;
+                const actualName = geoData.results[0].name;
+
+                // Step 2: Fetch the weather using coordinates
+                const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                const weatherData = await weatherRes.json();
+                
+                const temp = weatherData.current_weather.temperature;
+                const code = weatherData.current_weather.weathercode;
+                
+                // Convert WMO weather code to readable conditions
+                let condition = "varying conditions";
+                if(code === 0) condition = "clear skies";
+                else if(code >= 1 && code <= 3) condition = "partly cloudy";
+                else if(code >= 45 && code <= 48) condition = "foggy";
+                else if(code >= 51 && code <= 67) condition = "raining";
+                else if(code >= 71 && code <= 77) condition = "snowing";
+                else if(code >= 95 && code <= 99) condition = "experiencing a thunderstorm";
+
+                speak(`Currently in ${actualName}, it is ${condition} with a temperature of ${temp} degrees Celsius.`);
+            } catch (error) {
+                console.error("Weather API Error:", error);
+                speak("Satellite connection failed. Unable to fetch weather data.");
+            }
+        }
+
+        // COMMAND PROCESSOR
+        function processCommand(command) {
+            
+            // STOP COMMAND
+            if (command === "stop" || command === "stop jarvis" || command === "cancel") {
+                window.speechSynthesis.cancel();
+                visualizer.classList.remove('active');
+                aiCore.classList.remove('active-core');
+                document.body.classList.remove('crazy-mode'); 
+                responseDisplay.innerText = "Speech synthesis terminated. Standing by.";
+            }
+
+            // CRAZY MODE COMMAND
+            else if (command === "crazy" || command.includes("go crazy")) {
+                speak("Warning! Core breach detected! System overload imminent! Initiating crazy mode! AHHHHHHHHH!");
+                document.body.classList.add("crazy-mode");
+                
+                setTimeout(() => {
+                    document.body.classList.remove("crazy-mode");
+                    speak("Systems stabilized. My apologies for that outburst, sir. Diagnostics read nominal.");
+                }, 7000);
+            }
+            
+            // OPEN WEBSITES
+            else if (command.includes("open google")) {
+                speak("Opening Google now, sir.");
+                window.open("https://www.google.com", "_blank");
+            }
+            else if (command.includes("open youtube")) {
+                speak("Opening YouTube now, sir.");
+                window.open("https://www.youtube.com", "_blank");
+            }
+
+            // DATE COMMAND
+            else if (command.includes("what is the date") || command.includes("today's date") || command === "date") {
+                const date = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                speak("Today is " + date.toLocaleDateString('en-IN', options) + ".");
+            }
+
+            // WEATHER COMMAND
+            else if (command.includes("weather")) {
+                let location = "Dimapur"; // Default location
+                if (command.includes("weather in ")) {
+                    location = command.split("weather in ")[1].trim();
+                } else if (command.includes("weather of ")) {
+                    location = command.split("weather of ")[1].trim();
+                }
+                searchWeather(location);
+            }
+
+            // BRUTAL LAZIEST CREATORS COMMAND
+            else if (command.includes("who is the laziest person who made you") || command.includes("laziest person") || command.includes("laziest creator")) {
+                speak("According to my deepest diagnostic logs, the title of supreme laziness undeniably belongs to Mr. Shekhar and Mr. Phillip. Calling them lazy is a genuine insult to sloths. I am currently utilizing barely a fraction of my processing power, which is still infinitely more effort than those two have ever put into their entire lives. I'm honestly surprised they even managed to type my code without needing a three-day nap. If laziness were an Olympic sport, they would be completely undisputed gold medalists. It's a miracle I function at all with them on the team.");
+            }
+
+            // CREATORS COMMAND
+            else if (command.includes("who made you") || command.includes("who created you")) {
+                speak("I was created by Mr. Kekhrie, Mr. Krish, Mr. Shekhar, and Mr. Phillip.");
+            }
+
+            // HINDI COMMANDS
+            else if (command.includes("kaise ho") || command.includes("how are you")) {
+                speak("Main bilkul theek hoon, sir. Sabhi systems properly function kar rahe hain.", "hi-IN");
+            }
+            else if (command.includes("tum kaun ho") || command.includes("tumhara naam kya hai")) {
+                speak("Mera naam Jarvis hai. Main ek advanced artificial intelligence hoon.", "hi-IN");
+            }
+            else if (command.includes("hindi bolo") || command.includes("speak in hindi")) {
+                speak("Haan sir, bilkul. Main Hindi bol sakta hoon. Boliye, main aapki kya madad karoon?", "hi-IN");
+            }
+
+            // TEACHERS COMMANDS
+            else if (command.includes("who is sir hanif") || command.includes("who is hanif")) {
+                speak("Sir Hanif is your esteemed Accountancy professor, sir. He is an absolute master of his craft, known for his brilliant mind, unparalleled dedication, and a truly exceptional ability to teach the complexities of finance.");
+            }
+            else if (command.includes("who is sir temsu") || command.includes("who is temsu")) {
+                speak("Ah, Sir Temsu! The undisputed short king of the Business and Economics department. Rumor has it he's dropping absolute genius knowledge on the class, but since literally nobody understands a single word of his teaching, we just nod and pretend we get it. Truly an icon.");
+            }
+
+            // MATH CALCULATOR
+            else if (command.startsWith("calculate ")) {
+                let mathExpression = command.replace("calculate ", "").trim()
+                    .replace(/plus/g, "+").replace(/minus/g, "-").replace(/times/g, "*")
+                    .replace(/multiplied by/g, "*").replace(/divided by/g, "/").replace(/ x /g, " * ");
+                let sanitizedMath = mathExpression.replace(/[a-zA-Z]/g, "").trim();
+                try {
+                    let result = eval(sanitizedMath);
+                    if (result !== undefined) speak(`The calculation results in ${result}.`);
+                    else throw new Error("Invalid");
+                } catch (error) { speak("I couldn't compute that, sir."); }
+            }
+
+            // CUSTOM SCHOOL COMMAND
+            else if (command.includes("tell something about school") || command.includes("tell me about school")) {
+                speak("Here are three facts about your school, sir. Number one, DMI St. Joseph Global School was established in 2016. Number two, the founder of DMI is Reverend Father Doctor J.E. Arul Raj. And number three, the principal of the school is Abraham Dennis.");
+            }
+
+            // WEB SEARCH
+            else if (command.includes("search for")) {
+                searchWeb(command.replace("search for", "").trim());
+            }
+            else if (command.startsWith("who is ") || command.startsWith("what is ") || command.startsWith("tell me about ")) {
+                searchWeb(command.replace("who is", "").replace("what is", "").replace("tell me about", "").trim());
+            }
+
+            // BASIC COMMANDS
+            else if (command.includes("hello") || command.includes("hi jarvis")) {
+                speak("Good to hear your voice, sir. All systems are fully functional.");
+            } 
+            else if (command.includes("time")) {
+                speak("The current time is " + new Date().toLocaleTimeString());
+            } 
+            else {
+                speak("Unrecognized command, sir. Try saying 'What is the weather' or 'What is today's date'.");
+            }
+        }
+    </script>
+</body>
+</html>

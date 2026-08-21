@@ -2,13 +2,13 @@
 
 An interactive, futuristic web application inspired by Iron Man's **J.A.R.V.I.S. AI Assistant**, specifically engineered for the School Exhibition.
 
-[![Live Demo](https://img.shields.io/badge/GitHub_Pages-Live_Demo-22c55e?style=for-the-badge&logo=github&logoColor=white)](https://krish-sunar.github.io/JARVIS-School-Exhibition/)
+[![Vercel Live Deployment](https://img.shields.io/badge/Vercel-Live_Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://jarvis-school-exhibition.vercel.app)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/krish-sunar/JARVIS-School-Exhibition)
 
 ---
 
-## ?? Live Demo & Repository Links
-- ?? **Live Web Application (GitHub Pages)**: [https://krish-sunar.github.io/JARVIS-School-Exhibition/](https://krish-sunar.github.io/JARVIS-School-Exhibition/)
+## ?? Live Production & Repository Links
+- ?? **Live Web Application (Vercel)**: [https://jarvis-school-exhibition.vercel.app](https://jarvis-school-exhibition.vercel.app)
 - ?? **GitHub Repository**: [https://github.com/krish-sunar/JARVIS-School-Exhibition](https://github.com/krish-sunar/JARVIS-School-Exhibition)
 
 ---
@@ -23,17 +23,15 @@ An interactive, futuristic web application inspired by Iron Man's **J.A.R.V.I.S.
 
 ---
 
-## ??? Deployment Instructions
+## ??? Local Development
 
-### Permanent Hosting via GitHub Pages
-To activate your permanent live URL:
-1. Go to [Repository Pages Settings](https://github.com/krish-sunar/JARVIS-School-Exhibition/settings/pages).
-2. Under **Build and deployment** -> **Source**, select `Deploy from a branch`.
-3. Choose Branch `main` and folder `/ (root)`, then click **Save**.
-
-### Permanent Hosting via Vercel
-1. Go to [vercel.com/new](https://vercel.com/new).
-2. Import `krish-sunar/JARVIS-School-Exhibition` and click **Deploy**.
+To run locally without any installation:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/krish-sunar/JARVIS-School-Exhibition.git
+   cd JARVIS-School-Exhibition
+   ```
+2. Open `index.html` or `jarvis.html` in any web browser.
 
 ---
 

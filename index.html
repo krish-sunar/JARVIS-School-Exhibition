@@ -709,6 +709,12 @@
                 <div class="v-bar"></div>
                 <div class="v-bar"></div>
             </div>
+
+            <!-- MANUAL COMMAND INPUT -->
+            <div class="command-input-container" style="margin-top: 15px; display: flex; gap: 8px; width: 100%;">
+                <input type="text" id="command-input" placeholder="Type a command (e.g. 'play music', 'who is hanif')..." style="flex: 1; background: rgba(0, 0, 0, 0.7); border: 1px solid var(--faint-color); color: var(--primary-color); padding: 8px 12px; font-family: 'Orbitron', monospace; font-size: 0.8rem; border-radius: 4px; outline: none; box-shadow: inset 0 0 5px var(--glow-color);">
+                <button id="send-btn" style="background: rgba(0, 238, 255, 0.15); border: 1px solid var(--primary-color); color: var(--primary-color); padding: 8px 16px; font-family: 'Orbitron', monospace; font-size: 0.8rem; cursor: pointer; border-radius: 4px; text-shadow: 0 0 5px var(--glow-color); transition: all 0.3s ease;">SEND</button>
+            </div>
         </div>
 
         <!-- BUILT-IN MUSIC PLAYER -->
@@ -839,29 +845,54 @@
             });
         }
 
+        // MANUAL COMMAND INPUT HANDLER
+        const commandInput = document.getElementById('command-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function handleManualSubmit() {
+            if (!commandInput) return;
+            const val = commandInput.value.trim().toLowerCase();
+            if (val) {
+                transcriptDisplay.innerText = `MANUAL_TX: "${val}"`;
+                processCommand(val);
+                commandInput.value = "";
+            }
+        }
+
+        if (sendBtn && commandInput) {
+            sendBtn.addEventListener('click', handleManualSubmit);
+            commandInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleManualSubmit();
+            });
+        }
+
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-            alert("Speech Recognition not supported. Please use Google Chrome.");
+            console.warn("Speech Recognition not supported in this browser. Please use text input or Google Chrome.");
         } else {
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-IN';
 
             aiCore.addEventListener('click', () => {
-                window.speechSynthesis.cancel();
-                document.body.classList.remove('sad-mode');
+                try {
+                    window.speechSynthesis.cancel();
+                    document.body.classList.remove('sad-mode');
 
-                // Dim music slightly while listening
-                if (!internalAudioPlayer.paused) internalAudioPlayer.volume = 0.1;
+                    // Dim music slightly while listening
+                    if (!internalAudioPlayer.paused) internalAudioPlayer.volume = 0.1;
 
-                recognition.start();
-                aiCore.classList.add('listening'); aiCore.classList.add('active-core'); visualizer.classList.add('active');
-                transcriptDisplay.innerText = "LISTENING (MIC ACTIVE)...";
-                responseDisplay.innerText = "Processing audio input...";
+                    recognition.start();
+                    aiCore.classList.add('listening'); aiCore.classList.add('active-core'); visualizer.classList.add('active');
+                    transcriptDisplay.innerText = "LISTENING (MIC ACTIVE)...";
+                    responseDisplay.innerText = "Processing audio input...";
+                } catch (err) {
+                    console.warn("SpeechRecognition start error:", err);
+                    try { recognition.stop(); } catch(e) {}
+                }
             });
 
             recognition.onresult = (event) => {
-                // Restore music volume
                 if (!internalAudioPlayer.paused) internalAudioPlayer.volume = 0.5;
 
                 aiCore.classList.remove('listening'); aiCore.classList.remove('active-core'); visualizer.classList.remove('active');
@@ -874,6 +905,10 @@
                 if (!internalAudioPlayer.paused) internalAudioPlayer.volume = 0.5;
                 aiCore.classList.remove('listening'); aiCore.classList.remove('active-core'); visualizer.classList.remove('active');
                 transcriptDisplay.innerText = "Error in input: " + event.error;
+            };
+
+            recognition.onend = () => {
+                aiCore.classList.remove('listening');
             };
         }
 
@@ -968,6 +1003,7 @@
                 } else {
                     playAudioTrack(command);
                     return;
+                }
             }
 
             // CRAZY MODE COMMAND

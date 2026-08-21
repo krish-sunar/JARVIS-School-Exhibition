@@ -1,4 +1,4 @@
-# J.A.R.V.I.S. MK-IV Interface - School Exhibition ???
+# J.A.R.V.I.S. MK-IV Interface - School Exhibition
 
 An interactive, futuristic web application inspired by Iron Man's **J.A.R.V.I.S. AI Assistant**, specifically engineered for the School Exhibition.
 

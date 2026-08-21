@@ -7,23 +7,23 @@ An interactive, futuristic web application inspired by Iron Man's **J.A.R.V.I.S.
 
 ---
 
-## ?? Live Production & Repository Links
-- ?? **Live Web Application (Vercel)**: [https://jarvis-school-exhibition.vercel.app](https://jarvis-school-exhibition.vercel.app)
-- ?? **GitHub Repository**: [https://github.com/krish-sunar/JARVIS-School-Exhibition](https://github.com/krish-sunar/JARVIS-School-Exhibition)
+##  Live Production & Repository Links
+-  **Live Web Application (Vercel)**: [https://jarvis-school-exhibition.vercel.app](https://jarvis-school-exhibition.vercel.app)
+-  **GitHub Repository**: [https://github.com/krish-sunar/JARVIS-School-Exhibition](https://github.com/krish-sunar/JARVIS-School-Exhibition)
 
 ---
 
-## ? Features
+## Features
 
-- ?? **Arc Reactor & Particle Visualizer**: Dynamic HTML5 Canvas rendering quantum core particles, glowing concentric HUD rings, and real-time pulse animations.
-- ??? **Voice Recognition & AI Speech**: Web Speech API integration for live voice commands ("Jarvis", "Protocol", "Status", etc.) and real-time voice feedback.
-- ?? **Interactive Modes**: Includes standard operational HUD, protocol diagnostic routines, audio sound effects, and high-intensity "Crazy Mode" animations.
-- ?? **Telemetry & System Diagnostics**: Real-time mock telemetry displaying core temperature, power distribution, audio waveforms, and interactive status toggles.
-- ?? **Futuristic UI Aesthetics**: Built with custom Orbitron typography, neon cyan glassmorphism elements, dynamic CSS keyframes, and sleek HUD overlays.
+-  **Arc Reactor & Particle Visualizer**: Dynamic HTML5 Canvas rendering quantum core particles, glowing concentric HUD rings, and real-time pulse animations.
+-  **Voice Recognition & AI Speech**: Web Speech API integration for live voice commands ("Jarvis", "Protocol", "Status", etc.) and real-time voice feedback.
+-  **Interactive Modes**: Includes standard operational HUD, protocol diagnostic routines, audio sound effects, and high-intensity "Crazy Mode" animations.
+-  **Telemetry & System Diagnostics**: Real-time mock telemetry displaying core temperature, power distribution, audio waveforms, and interactive status toggles.
+-  **Futuristic UI Aesthetics**: Built with custom Orbitron typography, neon cyan glassmorphism elements, dynamic CSS keyframes, and sleek HUD overlays.
 
 ---
 
-## ??? Local Development
+##  Local Development
 
 To run locally without any installation:
 1. Clone the repository:
@@ -35,5 +35,5 @@ To run locally without any installation:
 
 ---
 
-## ?? License
+##  License
 This project is created for the School Exhibition display. All code is available under the MIT License.

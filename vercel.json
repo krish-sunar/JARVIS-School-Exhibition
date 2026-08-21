@@ -1,11 +1,3 @@
 {
-  "version": 2,
-  "name": "jarvis-school-exhibition",
-  "cleanUrls": true,
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
-  ]
+  "cleanUrls": true
 }

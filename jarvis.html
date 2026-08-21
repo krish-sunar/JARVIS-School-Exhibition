@@ -715,7 +715,7 @@
         <div class="music-player-hud" id="music-hud">
             <div class="now-playing-label">AUDIO SYSTEM: ACTIVE</div>
             <div class="track-name" id="track-name-display">NO TRACK LOADED</div>
-            <audio id="internal-audio-player"></audio>
+            <audio id="internal-audio-player" controls style="width: 100%; margin-top: 8px; height: 32px; filter: invert(1) hue-rotate(180deg); opacity: 0.95;"></audio>
         </div>
 
         <div class="status-bar">
@@ -755,17 +755,28 @@
 
         internalAudioPlayer.volume = 0.5;
 
-        function speak(text, lang = 'en-US') {
+        function speak(text, lang = 'en-US', callback = null) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.pitch = 0.8; utterance.rate = 1.1; utterance.lang = lang;
             responseDisplay.innerText = text;
             visualizer.classList.add('active'); aiCore.classList.add('active-core');
 
-            utterance.onend = () => {
-                visualizer.classList.remove('active'); aiCore.classList.remove('active-core');
-            }
+            let callbackCalled = false;
+            const runCallback = () => {
+                if (!callbackCalled) {
+                    callbackCalled = true;
+                    visualizer.classList.remove('active'); aiCore.classList.remove('active-core');
+                    if (callback) callback();
+                }
+            };
+
+            utterance.onend = runCallback;
+            utterance.onerror = runCallback;
             window.speechSynthesis.speak(utterance);
+
+            // Fallback timer to guarantee execution even if TTS event is delayed
+            setTimeout(runCallback, 3000);
         }
 
         function speakSad(text) {
@@ -781,6 +792,51 @@
                 document.body.classList.remove('sad-mode');
             }
             window.speechSynthesis.speak(utterance);
+        }
+
+        const availableTracks = [
+            { name: "Cupid - Fifty Fifty", file: "cupid.mp3", keywords: ["cupid", "fifty fifty"] },
+            { name: "Choo Lo - The Local Train", file: "choolo.mp3", keywords: ["choo lo", "choolo", "local train", "train"] },
+            { name: "Beat It - Michael Jackson", file: "beatit.mp3", keywords: ["beat it", "beatit", "michael jackson", "jackson"] }
+        ];
+        let currentTrackIndex = -1;
+
+        function playAudioTrack(command = "", forceNext = false) {
+            let selectedTrack = null;
+
+            if (!forceNext && command) {
+                for (let i = 0; i < availableTracks.length; i++) {
+                    if (availableTracks[i].keywords.some(kw => command.includes(kw))) {
+                        selectedTrack = availableTracks[i];
+                        currentTrackIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (!selectedTrack) {
+                if (forceNext && currentTrackIndex !== -1) {
+                    currentTrackIndex = (currentTrackIndex + 1) % availableTracks.length;
+                } else {
+                    currentTrackIndex = Math.floor(Math.random() * availableTracks.length);
+                }
+                selectedTrack = availableTracks[currentTrackIndex];
+            }
+
+            musicHud.style.display = "block";
+            trackNameDisplay.innerText = `READY: ${selectedTrack.name}`;
+            internalAudioPlayer.src = selectedTrack.file;
+            internalAudioPlayer.load();
+
+            speak(`Initializing audio systems. Now playing ${selectedTrack.name}.`, 'en-US', () => {
+                trackNameDisplay.innerText = selectedTrack.name;
+                internalAudioPlayer.play().then(() => {
+                    visualizer.classList.add('active');
+                }).catch(e => {
+                    console.error("Audio playback error:", e);
+                    trackNameDisplay.innerText = `${selectedTrack.name} (Press Play Controls Below)`;
+                });
+            });
         }
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -869,50 +925,49 @@
             // STOP COMMAND
             if (command === "stop" || command === "stop jarvis" || command === "cancel") {
                 window.speechSynthesis.cancel();
+                internalAudioPlayer.pause();
                 document.body.classList.remove('sad-mode');
                 visualizer.classList.remove('active');
                 aiCore.classList.remove('active-core');
                 document.body.classList.remove('crazy-mode');
-                responseDisplay.innerText = "Speech synthesis terminated. Standing by.";
+                responseDisplay.innerText = "Speech synthesis & audio terminated. Standing by.";
             }
 
             // INTERNAL MUSIC PLAYER COMMANDS
-            else if (command.includes("play song") || command.includes("play music") || command.includes("play a song")) {
-                const tracks = [
-                    { name: "Cupid - Fifty Fifty", file: "cupid.mp3" },
-                    { name: "Choo Lo - The Local Train", file: "choolo.mp3" },
-                    { name: "Beat It - Michael Jackson", file: "beatit.mp3" }
-                ];
-                const track = tracks[Math.floor(Math.random() * tracks.length)];
-
-                speak(`Initializing audio systems. Now playing ${track.name}.`);
-
-                // Show player UI and play audio
-                musicHud.style.display = "block";
-                trackNameDisplay.innerText = track.name;
-                internalAudioPlayer.src = track.file;
-
-                // Small delay to let Jarvis finish announcing before blasting music
-                setTimeout(() => {
-                    internalAudioPlayer.play().catch(e => {
-                        console.error("Audio playback error:", e);
-                        trackNameDisplay.innerText = "ERROR: MP3 FILE NOT FOUND IN FOLDER";
-                    });
-                }, 3500);
-            }
-            else if (command.includes("pause music") || command.includes("pause song")) {
+            else if (command.includes("pause music") || command.includes("pause song") || command.includes("pause audio") || command === "pause") {
                 internalAudioPlayer.pause();
                 speak("Audio playback paused, sir.");
             }
-            else if (command.includes("resume music") || command.includes("play the music")) {
+            else if (command.includes("resume music") || command.includes("resume song") || command.includes("resume audio") || command === "resume") {
                 internalAudioPlayer.play();
-                speak("Resuming audio playback.");
+                speak("Resuming audio playback, sir.");
             }
-            else if (command.includes("stop music") || command.includes("stop song")) {
+            else if (command.includes("stop music") || command.includes("stop song") || command.includes("stop audio")) {
                 internalAudioPlayer.pause();
                 internalAudioPlayer.currentTime = 0;
                 musicHud.style.display = "none";
                 speak("Audio systems disengaged.");
+            }
+            else if (command.includes("next song") || command.includes("next music") || command.includes("change song") || command.includes("skip song")) {
+                playAudioTrack(command, true);
+            }
+            else if (
+                command.includes("play") || 
+                command.includes("music") || 
+                command.includes("song") || 
+                command.includes("track") || 
+                command.includes("cupid") || 
+                command.includes("choo lo") || 
+                command.includes("choolo") || 
+                command.includes("beat it") || 
+                command.includes("beatit") || 
+                command.includes("michael jackson")
+            ) {
+                if (command.includes("google") || command.includes("youtube") || command.startsWith("calculate")) {
+                    // fallthrough to web search/open commands
+                } else {
+                    playAudioTrack(command);
+                    return;
             }
 
             // CRAZY MODE COMMAND
